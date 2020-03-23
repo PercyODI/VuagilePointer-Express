@@ -1,4 +1,6 @@
 body, html {
+    margin: 0px;
+    padding: 0px;
     height: 100%;
     overflow: hidden;
 }
@@ -21,7 +23,6 @@ body, html {
 
 .player-card {
     height: 200px;
-    width: 150px;
     border: 1px solid black;
     border-radius: 10%;
     font-size: 2em;
