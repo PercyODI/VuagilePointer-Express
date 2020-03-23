@@ -1,5 +1,5 @@
 ///@ts-check
-
+const appData = require("./data")
 const express = require("express")
 const app = express()
 const port = process.env.PORT || 3000
@@ -13,12 +13,11 @@ server.listen(port, () => console.log(`Listening on port ${port}\nLink: http://l
 // Express Routes
 app.use("/app", express.static("app/dist"));
 app.get("/", (req, res) => res.redirect("/app/index.html"))
+app.get("/api/users", (req, res) => res.json(appData.KnownUsers))
 
 // app.listen(port, () => console.log(`Listening on port ${port}\nLink: http://localhost:${port}`))
 
 // socket.io Routes
 io.on("connection", function(socket) {
     socket.emit("news", {hello: true})
-    console.log("Got a connection: ")
-    console.dir(socket)
 });
