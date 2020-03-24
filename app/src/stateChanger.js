@@ -4,15 +4,16 @@ import {cloneDeep} from "lodash"
 
 /**
  * @typedef VuagileState
+ * @property {string} mySocketId
  * @property {VuagilePlayer[]} players
  * @property {VuagilePlayerCard[]} playerCards
  * @property {VuagileTopic} topic
+ * @property {string[]} pickedCards
  * 
  * @typedef VuagilePlayer
- * @property {string} authName
- * @property {string} firstName
- * @property {string} lastName
  * @property {boolean} hasPickedCard
+ * @property {string} socketId
+ * @property {JQuery<HTMLElement>[]} jqueryElems
  * 
  * @typedef VuagilePlayerCard
  * @property {string} val
@@ -31,20 +32,9 @@ export class StateChanger {
          * @type {VuagileState}
          */
         this.state = {
-            players: [
-                {
-                    authName: "pearse.hutson",
-                    firstName: "Pearse",
-                    lastName: "Hutson",
-                    hasPickedCard: false
-                },
-                {
-                    authName: "stephen.brink",
-                    firstName: "Stephen",
-                    lastName: "Brink",
-                    hasPickedCard: true
-                }
-            ],
+            mySocketId: undefined,
+            pickedCards: undefined,
+            players: [],
             playerCards: [],
             topic: {
                 currentTopic: "This is my topic!",
@@ -74,6 +64,10 @@ export class StateChanger {
      */
     addChange(changeFunction) {
         this.incomingChange.next(changeFunction)
+    }
+
+    triggerUpdate() {
+        this.changeNotification.next(this.state);
     }
 }
 

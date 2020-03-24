@@ -21,14 +21,16 @@ body, html {
     height: 100%;
 }
 
-.player-card {
-    height: 200px;
+.card {
+    background-color: #fca903;
     border: 1px solid black;
     border-radius: 10%;
+    position: absolute;
+}
+
+.player-card {
     font-size: 2em;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    background-color: white;
 }
