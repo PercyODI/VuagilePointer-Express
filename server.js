@@ -18,6 +18,15 @@ app.post("/api/forceShowCards", (req, res) => {
     io.emit("showCards", players.filter(p => p.hasPickedCard).map(p => p.pickedCard));
     res.json("Done.")
 });
+app.post("/api/forceReset", (req, res) => {
+    for (const player of players) {
+        player.pickedCard = null;
+        player.hasPickedCard = false;
+    }
+    allowPickingCards = true;
+    io.emit("resetPlay");
+    res.json("Done.")
+})
 
 // app.listen(port, () => console.log(`Listening on port ${port}\nLink: http://localhost:${port}`))
 let players = []
