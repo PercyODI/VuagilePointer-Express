@@ -19,7 +19,7 @@ $(function () {
   // gsap.ticker.add(() => renderPlayArea(stateChanger.state))
   // createDelayedCall();
   stateChanger.changeNotification.subscribe(renderPlayArea);
-  stateChanger.changeNotification.subscribe(d => console.log(d));
+  // stateChanger.changeNotification.subscribe(d => console.log(d));
   $(window).resize(() => stateChanger.triggerUpdate());
   createPlayerCards();
 })
@@ -29,8 +29,6 @@ socket.on("updatePlayers", /**
      * @param {import("./stateChanger").VuagilePlayer[]} incomingPlayers
      */
   function (incomingPlayers) {
-    console.log("Receving Player Update:")
-    console.dir(incomingPlayers)
     stateChanger.addChange(s => {
       for (const player of incomingPlayers.filter(ip => ip.socketId != s.mySocketId)) {
         var existingPlayer = s.players.find(p => p.socketId == player.socketId);
@@ -57,7 +55,6 @@ socket.on("updatePlayers", /**
 socket.on("updateSocketId", (socketId) => stateChanger.addChange(s => s.mySocketId = socketId))
 socket.on("showCards", (pickedCardVals) => {
   renderShownCards(pickedCardVals);
-  console.log("Showing Cards")
   stateChanger.addChange(s => s.pickedCards = pickedCardVals);
 });
 socket.on("resetPlay", () => {
@@ -121,7 +118,7 @@ function renderPlayArea(state) {
           playerCardProps = {
             ...playerCardProps,
             duration: .5,
-            top: 0 - cardHeight,
+            top: 0 - cardHeight * 2,
             left: (bodyWidth / 2) - (cardWidth / 2)
           }
         }
@@ -160,7 +157,6 @@ function renderPlayArea(state) {
       let card = player.jqueryElems[j];
       let otherPlayerCardProps = {};
 
-
       let startingTop = 50;
       let endingTop = bodyHeight - (cardHeight * 1.2)
       let topSpread = (endingTop - startingTop) / otherPlayersList.length;
@@ -181,7 +177,6 @@ function renderPlayArea(state) {
         }
       }
 
-      console.log("Has Other Player Picked Card? " + player.hasPickedCard)
       if (player.hasPickedCard && j == player.jqueryElems.length - 1) {
         if (i % 2 == 0) {
           otherPlayerCardProps = {
@@ -196,10 +191,10 @@ function renderPlayArea(state) {
         }
 
         if (state.pickedCards != undefined) {
-
           otherPlayerCardProps = {
             ...otherPlayerCardProps,
-            top: -100
+            top: -100,
+            duration: 1.5
           }
         }
       }
@@ -217,12 +212,13 @@ function renderPlayArea(state) {
     gsap.to(".player-card.shownCards", {
       duration: 1,
       top: function (i) {
-        return (Math.floor(i / 5) * cardHeight) + startingPoint
+        return (Math.floor(i / 5) * cardHeight) + (50 * scale)
       },
       left: function (i) {
         return ((i % 5) * cardWidth) + startingPoint + cardWidth
       },
-      scale: scale
+      scale: scale,
+      zIndex: 50
     })
 
   } else {
@@ -230,7 +226,8 @@ function renderPlayArea(state) {
     gsap.to(".player-card.shownCards", {
       duration: 1,
       top: -cardHeight - 50,
-      left: (bodyWidth / 2) - (cardWidth / 2)
+      left: (bodyWidth / 2) - (cardWidth / 2),
+      opacity: 0
     })
   }
   //
@@ -274,7 +271,11 @@ function createPlayerCards() {
                     <span class="player-card-span">${cardVal}</span>
                 </div>
             `);
-    cardElem.css({ top: bodyHeight, left: bodyWidth / 2 });
+    cardElem.css({
+      top: bodyHeight,
+      left: bodyWidth / 2,
+      "transform-origin": "top left"
+    });
     cardElem.width(75)
     cardElem.height(100);
     workingArea.append(cardElem);
@@ -344,7 +345,11 @@ function renderShownCards(pickedCardVals) {
                     <span class="player-card-span">${cardVal}</span>
                 </div>
             `);
-    cardElem.css({ top: 0 - 100, left: (bodyWidth / 2) - (75 / 2) });
+    cardElem.css({
+      top: 0 - 100,
+      left: (bodyWidth / 2) - (75 / 2),
+      "transform-origin": "top left"
+    });
     cardElem.width(75)
     cardElem.height(100);
     workingArea.append(cardElem);
