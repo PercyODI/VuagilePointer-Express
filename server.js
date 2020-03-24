@@ -21,6 +21,8 @@ app.post("/api/forceShowCards", (req, res) => {
 
 // app.listen(port, () => console.log(`Listening on port ${port}\nLink: http://localhost:${port}`))
 let players = []
+let allowPickingCards = true;
+let allowedCards = ["1", "2", "3", "5", "8", "21", "??", "Too-Complex"];
 
 // socket.io Routes
 io.on("connection", function (socket) {
@@ -34,27 +36,30 @@ io.on("connection", function (socket) {
     io.emit("updatePlayers", players.filter(p => p.isPointing).map(userToEmit));
 
     socket.on("pickedCard", function (cardPicked) {
-        let foundPlayer = players.find(p => p.socketId == socket.id)
-        if (cardPicked != null) {
-            foundPlayer.pickedCard = cardPicked;
-            foundPlayer.hasPickedCard = true;
-        } else {
-            foundPlayer.pickedCard = null;
-            foundPlayer.hasPickedCard = false;
-        }
-        io.emit("updatePlayers", players.filter(p => p.isPointing).map(userToEmit));
+        if (allowPickingCards) {
+            let foundPlayer = players.find(p => p.socketId == socket.id)
+            if (cardPicked != null) {
+                foundPlayer.pickedCard = cardPicked;
+                foundPlayer.hasPickedCard = true;
+            } else {
+                foundPlayer.pickedCard = null;
+                foundPlayer.hasPickedCard = false;
+            }
+            io.emit("updatePlayers", players.filter(p => p.isPointing).map(userToEmit));
 
-        console.log("all Picked Card? " + players.filter(p => p.isPointing && !p.hasPickedCard).length)
-        if (players.filter(p =>p.isPointing && !p.hasPickedCard).length == 0) {
-            io.emit("showCards", players.filter(p => p.hasPickedCard).map(p => p.pickedCard))
+            console.log("all Picked Card? " + players.filter(p => p.isPointing && !p.hasPickedCard).length)
+            if (players.filter(p => p.isPointing && !p.hasPickedCard).length == 0) {
+                io.emit("showCards", players.filter(p => p.hasPickedCard && allowedCards.findIndex(ac => p.pickedCard == ac) != -1).map(p => p.pickedCard))
+                allowPickingCards = false;
+            }
         }
     })
-
     socket.on("reset", function () {
         for (const player of players) {
             player.pickedCard = null;
             player.hasPickedCard = false;
         }
+        allowPickingCards = true;
         io.emit("resetPlay");
     })
 
@@ -66,7 +71,7 @@ io.on("connection", function (socket) {
         io.emit("updatePlayers", players.filter(p => p.isPointing).map(userToEmit));
 
         console.log("all Picked Card? " + players.filter(p => p.isPointing && !p.hasPickedCard).length)
-        if (players.filter(p =>p.isPointing && !p.hasPickedCard).length == 0) {
+        if (players.filter(p => p.isPointing && !p.hasPickedCard).length == 0) {
             io.emit("showCards", players.filter(p => p.hasPickedCard).map(p => p.pickedCard))
         }
     })
