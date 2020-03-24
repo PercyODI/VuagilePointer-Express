@@ -25,8 +25,13 @@ let players = []
 // socket.io Routes
 io.on("connection", function (socket) {
     socket.emit("updateSocketId", socket.id)
-    players.push({ socketId: socket.id, hasPickedCard: false });
-    io.emit("updatePlayers", players.map(userToEmit));
+    players.push({
+        socketId: socket.id,
+        hasPickedCard: false,
+        pickedCard: null,
+        isPointing: true
+    });
+    io.emit("updatePlayers", players.filter(p => p.isPointing).map(userToEmit));
 
     socket.on("pickedCard", function (cardPicked) {
         let foundPlayer = players.find(p => p.socketId == socket.id)
@@ -37,20 +42,33 @@ io.on("connection", function (socket) {
             foundPlayer.pickedCard = null;
             foundPlayer.hasPickedCard = false;
         }
-        io.emit("updatePlayers", players.map(userToEmit));
+        io.emit("updatePlayers", players.filter(p => p.isPointing).map(userToEmit));
 
-        console.log("all Picked Card? " + players.filter(p => !p.hasPickedCard).length)
-        if(players.filter(p => !p.hasPickedCard).length == 0){
-            io.emit("showCards", players.map(p => p.pickedCard))
+        console.log("all Picked Card? " + players.filter(p => p.isPointing && !p.hasPickedCard).length)
+        if (players.filter(p =>p.isPointing && !p.hasPickedCard).length == 0) {
+            io.emit("showCards", players.filter(p => p.hasPickedCard).map(p => p.pickedCard))
         }
     })
 
-    socket.on("reset", function() {
+    socket.on("reset", function () {
         for (const player of players) {
             player.pickedCard = null;
             player.hasPickedCard = false;
         }
         io.emit("resetPlay");
+    })
+
+    socket.on("notPointing", function () {
+        let foundPlayer = players.find(p => p.socketId == socket.id);
+        foundPlayer.isPointing = false;
+        foundPlayer.hasPickedCard = false;
+        foundPlayer.pickedCard = null;
+        io.emit("updatePlayers", players.filter(p => p.isPointing).map(userToEmit));
+
+        console.log("all Picked Card? " + players.filter(p => p.isPointing && !p.hasPickedCard).length)
+        if (players.filter(p =>p.isPointing && !p.hasPickedCard).length == 0) {
+            io.emit("showCards", players.filter(p => p.hasPickedCard).map(p => p.pickedCard))
+        }
     })
 
     socket.on("disconnect", function () {

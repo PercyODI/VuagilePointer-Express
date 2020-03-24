@@ -9,6 +9,7 @@ import {cloneDeep} from "lodash"
  * @property {VuagilePlayerCard[]} playerCards
  * @property {VuagileTopic} topic
  * @property {string[]} pickedCards
+ * @property {boolean} isPointing
  * 
  * @typedef VuagilePlayer
  * @property {boolean} hasPickedCard
@@ -32,6 +33,7 @@ export class StateChanger {
          * @type {VuagileState}
          */
         this.state = {
+            isPointing: true,
             mySocketId: undefined,
             pickedCards: undefined,
             players: [],

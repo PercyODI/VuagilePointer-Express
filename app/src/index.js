@@ -85,49 +85,65 @@ function renderPlayArea(state) {
   let scale = bodyWidth / 750;
   let cardHeight = 100 * scale;
   let cardWidth = 75 * scale;
-  for (let i = 0; i < state.playerCards.length; i++) {
-    let playerCardProps = {
-      scale: scale
-    };
-    let playerCard = state.playerCards[i];
-
-    if (!playerCard.picked && !playerCard.hovered) {
-      playerCardProps = {
-        ...playerCardProps,
-        top: bodyHeight - cardHeight,
-        left: spread * playerCardsNotPicked.indexOf(playerCard) + startingPoint
+  if (state.isPointing) {
+    for (let i = 0; i < state.playerCards.length; i++) {
+      let playerCardProps = {
+        scale: scale
       };
-      gsap.set(playerCard.jqueryElem, { zIndex: i })
-    }
+      let playerCard = state.playerCards[i];
 
-    if (!playerCard.picked && playerCard.hovered) {
-      playerCardProps = {
-        ...playerCardProps,
-        top: bodyHeight - (cardHeight * 1.1)
-      }
-      gsap.set(playerCard.jqueryElem, { zIndex: state.playerCards.length })
-    }
-
-    if (playerCard.picked) {
-      if (state.pickedCards == undefined) {
+      if (!playerCard.picked && !playerCard.hovered) {
         playerCardProps = {
           ...playerCardProps,
-          duration: .3,
-          top: (bodyHeight - (cardHeight * 2.1)),
-          left: (bodyWidth / 2) - (cardWidth / 2)
-        }
-      } else {
+          top: bodyHeight - cardHeight,
+          left: spread * playerCardsNotPicked.indexOf(playerCard) + startingPoint
+        };
+        gsap.set(playerCard.jqueryElem, { zIndex: i })
+      }
+
+      if (!playerCard.picked && playerCard.hovered) {
         playerCardProps = {
           ...playerCardProps,
-          duration: .5,
-          top: 0 - cardHeight,
-          left: (bodyWidth / 2) - (cardWidth / 2)
+          top: bodyHeight - (cardHeight * 1.1)
+        }
+        gsap.set(playerCard.jqueryElem, { zIndex: state.playerCards.length })
+      }
+
+      if (playerCard.picked) {
+        if (state.pickedCards == undefined) {
+          playerCardProps = {
+            ...playerCardProps,
+            duration: .3,
+            top: (bodyHeight - (cardHeight * 2.1)),
+            left: (bodyWidth / 2) - (cardWidth / 2)
+          }
+        } else {
+          playerCardProps = {
+            ...playerCardProps,
+            duration: .5,
+            top: 0 - cardHeight,
+            left: (bodyWidth / 2) - (cardWidth / 2)
+          }
         }
       }
+      gsap.to(playerCard.jqueryElem, {
+        duration: .2,
+        scale: scale,
+        ...playerCardProps
+      })
+
+      // Render extra things
+      gsap.to("#notPointingBtn", {
+        duration: 2,
+        top: bodyHeight - $("#notPointingBtn").height() - 10,
+        left: 10
+      })
     }
-    gsap.to(playerCard.jqueryElem, {
-      duration: .2,
-      ...playerCardProps
+  } else {
+    gsap.to(state.playerCards.map(pc => pc.jqueryElem), {
+      opacity: 0,
+      duration: 3,
+      display: "none"
     })
   }
 
@@ -200,10 +216,10 @@ function renderPlayArea(state) {
     gsap.to("#reset-btn", { opacity: 1, duration: 1 })
     gsap.to(".player-card.shownCards", {
       duration: 1,
-      top: function(i) {
+      top: function (i) {
         return (Math.floor(i / 5) * cardHeight) + startingPoint
       },
-      left: function(i) {
+      left: function (i) {
         return ((i % 5) * cardWidth) + startingPoint + cardWidth
       },
       scale: scale
@@ -294,9 +310,17 @@ function createPlayerCards() {
     }))
   }
 
+  var notPointingBtn = $(`<button id="notPointingBtn">I'm Not Pointing</button>`)
+  notPointingBtn.css({ position: "absolute", top: bodyHeight, left: -200 })
+  notPointingBtn.click(() => {
+    socket.emit("notPointing")
+    stateChanger.addChange(s => s.isPointing = false);
+  })
+
+  workingArea.append(notPointingBtn)
 }
 
-function renderShownCards(pickedCardVals){
+function renderShownCards(pickedCardVals) {
   $(".shownCards").remove();
 
   let workingArea = $(`#workingArea`);
@@ -311,9 +335,9 @@ function renderShownCards(pickedCardVals){
   resetBtn.css({ position: "absolute", top: 5, left: 20, opacity: 0 });
   workingArea.append(resetBtn);
 
-  for(let i = 0; i < pickedCardVals.length; i++){
+  for (let i = 0; i < pickedCardVals.length; i++) {
     var cardVal = pickedCardVals[i];
-    
+
     let cardElem = $(/*html*/
       `
                 <div class="player-card card shownCards" id="player-card-${cardVal}">
