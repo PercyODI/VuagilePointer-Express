@@ -7,9 +7,7 @@ import { StateChanger } from "./stateChanger"
 import _ from "lodash"
 
 const appSettings = {
-  hostUrl: process.env.NODE_ENV == "production"
-    ? "https://vuagile-pointer.herokuapp.com"
-    : "http://localhost:3000"
+  hostUrl: window.location.origin
 }
 const stateChanger = new StateChanger();
 

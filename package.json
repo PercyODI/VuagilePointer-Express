@@ -9,9 +9,10 @@
     "build:prod": "webpack --config ./webpack/webpack.prod.js --progress --colors",
     "heroku-postbuild": "npm run build:prod",
     "webpack-watch": "webpack --config ./webpack/webpack.dev.js --progress --colors --watch",
-    "express-watch": "nodemon --ignore app/ ./server.js",
+    "express-watch": "heroku local -f Procfile.watch",
     "watch": "run-p webpack-watch express-watch",
-    "start": "node server.js"
+    "debug": "node --inspect server/server.js",
+    "start": "node server/server.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   "homepage": "https://github.com/PercyODI/VuagilePointer-Express#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "mongodb": "^3.5.5",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
