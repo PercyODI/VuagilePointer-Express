@@ -1,1 +1,2 @@
-web: nodemon --exec "npm run debug" --ignore /app
+web: nodemon --exec "npm run debug:server" --watch ./server
+worker: nodemon --exec "npm run debug:worker" --watch ./worker

@@ -1,5 +1,4 @@
 ///@ts-check
-const appData = require("./data")
 const socketEvents = require("./socketEvents")
 const express = require("express")
 const app = express()
@@ -9,12 +8,20 @@ const port = process.env.PORT
 var server = new (require("http").Server)(app);
 var io = require("socket.io")(server);
 
+// controllers
+let RoomController = require("./controllers/roomController")
+
 server.listen(port, () => console.log(`Listening on port ${port}\nLink: http://localhost:${port}`))
 
 // Express Routes
 app.use("/app", express.static("app/dist"));
 app.get("/", (req, res) => res.redirect("/app/index.html"))
-app.get("/api/users", (req, res) => res.json(appData.KnownUsers))
+
+// Controlled Express Routes
+RoomController.applyRoutes(app);
+
+
+// app.get("/api/users", (req, res) => res.json(appData.KnownUsers))
 // app.post("/api/forceShowCards", (req, res) => {
 //     io.emit("showCards", players.filter(p => p.hasPickedCard).map(p => p.pickedCard));
 //     res.json("Done.")
